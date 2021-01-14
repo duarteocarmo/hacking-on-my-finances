@@ -1,0 +1,61 @@
+{
+    "AWSEBDockerrunVersion": 2,
+    "volumes": [
+        {
+            "name": "fava",
+            "host": {
+                "sourcePath": "/var/app/current"
+            }
+        }
+    ],
+    "containerDefinitions": [
+        {
+            "name": "fava",
+            "image": "yegle/fava",
+            "essential": true,
+            "memory": 128,
+            "environment": [
+                {
+                    "name": "BEANCOUNT_FILE",
+                    "value": "/bean/example.beancount"
+                }
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "fava",
+                    "containerPath": "/bean",
+                    "readOnly": true
+                }
+            ]
+        },
+        {
+            "name": "auth-nginx",
+            "image": "beevelop/nginx-basic-auth",
+            "essential": true,
+            "memory": 128,
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "containerPort": 80
+                }
+            ],
+            "links": [
+                "fava"
+            ],
+            "environment": [
+                {
+                    "name": "FORWARD_PORT",
+                    "value": 5000
+                },
+                {
+                    "name": "FORWARD_HOST",
+                    "value": "fava"
+                },
+                {
+                    "name": "HTPASSWD",
+                    "value": "foo:hashed_bar"
+                }
+            ]
+        }
+    ]
+}

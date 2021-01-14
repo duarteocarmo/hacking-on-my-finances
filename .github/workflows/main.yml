@@ -1,0 +1,53 @@
+name: Deploy master
+on:
+  push:
+    paths:
+    - "example.beancount"
+    
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout source code
+      uses: actions/checkout@v1
+  
+    - name: Setup python3
+      uses: actions/setup-python@v2
+
+    - name: Install setup tools
+      run: sudo apt-get install python3-setuptools
+
+    - name: Install requirements
+      run: python3 -m pip install beancount
+
+    - name: Check beancount file 
+      run: bean-check $BEANCOUNT_FILE
+      env:
+        BEANCOUNT_FILE: example.beancount
+
+  build:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout source code
+      uses: actions/checkout@v1
+
+    - name: Generate deployment package
+      run: zip deploy.zip -j $BEANCOUNT_FILE $AWS_DOCKER_FILE
+      env:
+        BEANCOUNT_FILE: example.beancount
+        AWS_DOCKER_FILE: deploy/Dockerrun.aws.json
+      
+    - name: Deploy to EB
+      uses: einaregilsson/beanstalk-deploy@v14
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: APPLICATION_NAME
+        environment_name: ENVIRONMENT_NAME
+        version_label: ${{ github.run_number }}
+        region: REGION
+        deployment_package: deploy.zip
+        wait_for_environment_recovery: 180

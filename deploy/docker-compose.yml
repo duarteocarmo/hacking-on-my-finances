@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  fava:
+    image: yegle/fava
+    volumes:
+      - "./:/bean"
+    environment:
+      BEANCOUNT_FILE: /bean/example.beancount
+  auth:
+    image: beevelop/nginx-basic-auth
+    links:
+      - fava:fava
+    ports:
+      - 80:80
+    environment:
+      FORWARD_PORT: 5000
+      FORWARD_HOST: fava
+      HTPASSWD: "foo:hashed_bar"

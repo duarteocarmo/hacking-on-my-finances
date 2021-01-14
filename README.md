@@ -1,2 +1,3 @@
-# hacking-on-my-finances
-Sanitized repo of my personal finance setup
+# Deploying beancount to the Cloud
+
+[Link to article](duarteocarmo.com)

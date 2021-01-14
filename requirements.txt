@@ -1,0 +1,4 @@
+beancount
+fava
+requests
+yfinance
